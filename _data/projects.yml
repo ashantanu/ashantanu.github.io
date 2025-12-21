@@ -1,0 +1,38 @@
+# Projects data file - Add new projects at the top
+# Both the main page (shows top 3) and projects page (shows all) use this file
+
+- name: ColorAI
+  image: assets/images/my_images/colorai.svg
+  url: https://www.figma.com/community/plugin/1287943560880269789/colorai
+  description: "AI-powered Figma plugin for generating color palettes from text prompts. 10K+ users, 2K+ likes on Figma Community."
+
+- name: VecFusion
+  image: assets/images/my_images/vecfusion.svg
+  url: https://github.com/ashantanu/VecFusion
+  description: "Vector font generation with diffusion models. Published at CVPR 2024."
+
+- name: Multimodal Multi-Task Learning for Ego4D
+  image: assets/images/my_images/ego4d.png
+  url: https://github.com/subramanya1997/ego4d
+  description: "Multi-modal multi-task transformer for the Natural Language Query task on Meta's Ego4D dataset."
+
+- name: DL Diamond Cutting
+  image: assets/images/my_images/diamond.gif
+  url: https://github.com/ashantanu/DL_diamond_cutting
+  description: "3D Neural Network using PointNet++ and MeshNet for optimal fine cut diamond placement within raw diamonds."
+
+- name: Hate Speech Detection
+  image: assets/images/my_images/rise.gif
+  url: https://github.com/mrinaltak/HateSpeechDetection
+  description: "Prompt-based Hate Speech detection with BERT and T5 on HatEval and OffensEval datasets."
+
+- name: Large Conference Matching
+  image: assets/images/my_images/connection.gif
+  url: https://github.com/ChrisCameron1/LargeConferenceMatching
+  description: "Matching papers and reviewers at large conferences using optimization algorithms."
+
+- name: DCGAN
+  image: assets/images/my_images/dcgan.gif
+  url: https://github.com/ashantanu/DCGAN
+  description: "PyTorch implementation of Deep Convolutional Generative Adversarial Network."
+

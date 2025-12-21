@@ -1,7 +1,11 @@
-<h2>Recent Projects</h2>
+---
+layout: article
+title: Projects
+sidebar:
+  nav: layouts
+---
 
-{% assign recent_projects = site.data.projects | slice: 0, 3 %}
-{% for project in recent_projects %}
+{% for project in site.data.projects %}
 <div class="m-2">
     <div class="item">
         <div class="item__image">
@@ -18,7 +22,3 @@
     </div>
 </div>
 {% endfor %}
-
-<div class="see-more-link" style="text-align: right; margin-top: 1rem;">
-    <a href="projects.html" style="color: #0366d6; font-weight: 500;">See more projects →</a>
-</div>
