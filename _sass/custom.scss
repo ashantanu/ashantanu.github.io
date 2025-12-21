@@ -1,3 +1,58 @@
 /* start custom scss snippet */
 
+// Figtree - modern geometric font
+body {
+  font-family: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+// Mobile sidebar: always open by default
+@media (max-width: 1024px) {
+  // Start with sidebar visible
+  .page__sidebar {
+    transform: translate(0) !important;
+  }
+  
+  // Start with mask visible
+  .page__mask {
+    visibility: visible;
+    opacity: 0.5;
+  }
+  
+  // Hide the toggle button when sidebar is open by default
+  .page__actions {
+    visibility: hidden;
+  }
+  
+  // When sidebar is explicitly hidden (via close button click)
+  .sidebar-hidden {
+    .page__sidebar {
+      transform: translate(-400px) !important;
+    }
+    .page__mask {
+      visibility: hidden;
+      opacity: 0;
+    }
+    .page__actions {
+      visibility: visible !important;
+    }
+  }
+}
+
+// Make sidebar toggle button more visible (for when sidebar is closed)
+.page__actions .sidebar-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  
+  &:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    transform: scale(1.05);
+  }
+  
+  i {
+    color: white;
+  }
+}
+
 /* end custom scss snippet */
