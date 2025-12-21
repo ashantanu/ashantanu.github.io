@@ -5,53 +5,110 @@ body {
   font-family: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-// Mobile sidebar: always open by default
+// Theme highlight color (coral)
+$sidebar-accent: #e07a5f;
+
+// Mobile sidebar toggle button - hamburger/X toggle
 @media (max-width: 1024px) {
-  // Start with sidebar visible
-  .page__sidebar {
-    transform: translate(0) !important;
-  }
-  
-  // Start with mask visible
-  .page__mask {
-    visibility: visible;
-    opacity: 0.5;
-  }
-  
-  // Hide the toggle button when sidebar is open by default
+  // Keep toggle button always visible on mobile
   .page__actions {
-    visibility: hidden;
+    display: block !important;
+    visibility: visible !important;
+    z-index: 1000;
   }
   
-  // When sidebar is explicitly hidden (via close button click)
-  .sidebar-hidden {
-    .page__sidebar {
-      transform: translate(-400px) !important;
+  .sidebar-button.js-sidebar-toggle {
+    background-color: $sidebar-accent !important;
+    box-shadow: 0 4px 12px rgba($sidebar-accent, 0.4);
+    transition: all 0.25s ease;
+    color: white !important;
+    
+    &:hover, &:focus, &:active {
+      background-color: darken($sidebar-accent, 8%) !important;
+      transform: scale(1.08);
     }
-    .page__mask {
-      visibility: hidden;
-      opacity: 0;
+    
+    // SVG icon styles
+    svg {
+      width: 20px;
+      height: 20px;
+      stroke: white !important;
     }
-    .page__actions {
-      visibility: visible !important;
+    
+    // Default state: show hamburger, hide X
+    .icon--hamburger {
+      display: block !important;
+    }
+    .icon--close {
+      display: none !important;
+    }
+  }
+  
+  // When sidebar is open: show X, hide hamburger
+  .show-sidebar .sidebar-button.js-sidebar-toggle {
+    .icon--hamburger {
+      display: none !important;
+    }
+    .icon--close {
+      display: block !important;
     }
   }
 }
 
-// Make sidebar toggle button more visible (for when sidebar is closed)
-.page__actions .sidebar-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  
-  &:hover {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    transform: scale(1.05);
+// Desktop: hide the toggle button entirely
+@media (min-width: 1025px) {
+  .page__actions {
+    display: none !important;
+  }
+}
+
+// Mobile: Recent Projects layout improvements
+@media (max-width: 768px) {
+  // Project item cards - better mobile layout
+  .item {
+    flex-direction: row !important;
+    align-items: flex-start;
+    gap: 1rem;
+    
+    .item__image {
+      flex-shrink: 0;
+      margin-right: 0;
+      
+      .image--sm {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+    }
+    
+    .item__content {
+      flex: 1;
+      min-width: 0;
+      
+      .item__header h4 {
+        font-size: 1rem;
+        margin: 0 0 0.25rem 0;
+        line-height: 1.3;
+      }
+      
+      .item__description p {
+        font-size: 0.85rem;
+        margin: 0;
+        color: #666;
+        line-height: 1.4;
+        // Limit to 2 lines on mobile
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    }
   }
   
-  i {
-    color: white;
+  // Tighter spacing between project items
+  .m-2 {
+    margin: 0.5rem 0 !important;
   }
 }
 

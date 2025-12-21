@@ -4,7 +4,7 @@
   window.Lazyload.js(SOURCES.jquery, function() {
     var $pageMask = $('.js-page-mask');
     var $pageRoot = $('.js-page-root');
-    var $sidebarShow = $('.js-sidebar-show');
+    var $sidebarToggle = $('.js-sidebar-toggle');
     var $sidebarHide = $('.js-sidebar-hide');
 
     function freeze(e) {
@@ -20,11 +20,42 @@
       }
     }
 
-    $sidebarShow.on('click', function() {
-      stopBodyScrolling(true); $pageRoot.addClass('show-sidebar');
+    // Check if mobile (viewport width <= 1024px)
+    function isMobile() {
+      return window.innerWidth <= 1024;
+    }
+
+    function showSidebar() {
+      stopBodyScrolling(true);
+      $pageRoot.addClass('show-sidebar');
+    }
+
+    function hideSidebar() {
+      stopBodyScrolling(false);
+      $pageRoot.removeClass('show-sidebar');
+    }
+
+    function toggleSidebar() {
+      if ($pageRoot.hasClass('show-sidebar')) {
+        hideSidebar();
+      } else {
+        showSidebar();
+      }
+    }
+
+    // On mobile, automatically show sidebar on page load
+    if (isMobile()) {
+      showSidebar();
+    }
+
+    // Toggle button clicks
+    $sidebarToggle.on('click', function() {
+      toggleSidebar();
     });
+
+    // Clicking mask hides sidebar
     $sidebarHide.on('click', function() {
-      stopBodyScrolling(false); $pageRoot.removeClass('show-sidebar');
+      hideSidebar();
     });
   });
 })();
