@@ -1,6 +1,11 @@
 # Projects data file - Add new projects at the top
 # Both the main page (shows top 3) and projects page (shows all) use this file
 
+- name: Panda Tracker
+  image: assets/images/my_images/pandatracker.jpeg
+  url: https://panda-tracker.ofalabs.com
+  description: "Chrome Dino-style game meets real-time flight tracker. Built to track a friend's holiday adventure."
+
 - name: ColorAI
   image: assets/images/my_images/colorai.svg
   url: https://www.figma.com/community/plugin/1287943560880269789/colorai
