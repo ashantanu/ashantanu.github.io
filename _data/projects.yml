@@ -1,6 +1,11 @@
 # Projects data file - Add new projects at the top
 # Both the main page (shows top 3) and projects page (shows all) use this file
 
+- name: UltraSummary AI Recap
+  image: assets/images/my_images/ultrasummary.png
+  url: https://www.youtube.com/playlist?list=PL8cfo2UF75eVapfChpzlz_HdXGegkkbzV
+  description: "An automation system that fetches AI news from Gmail newsletters, generates summaries using AI, creates videos with text-to-speech, and automatically uploads them to YouTube daily."
+
 - name: PhotoGenie
   image: assets/images/my_images/photogenie.png
   url: https://photogenie.ofalabs.com/
