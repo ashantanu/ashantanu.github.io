@@ -1,6 +1,11 @@
 # Projects data file - Add new projects at the top
 # Both the main page (shows top 3) and projects page (shows all) use this file
 
+- name: Neon Saber VR
+  image: assets/images/my_images/neon-saber.png
+  url: https://www.ashantanu.com/neon-saber/
+  description: "A web-based VR game inspired by Beat Saber. Uses webcam hand tracking via MediaPipe to slash through blocks. Built with React, Three.js, and features 8-bit melodies."
+
 - name: UltraSummary AI Recap
   image: assets/images/my_images/ultrasummary.png
   url: https://www.youtube.com/playlist?list=PL8cfo2UF75eVapfChpzlz_HdXGegkkbzV
