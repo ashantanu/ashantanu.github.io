@@ -1,6 +1,11 @@
 # Projects data file - Add new projects at the top
 # Both the main page (shows top 3) and projects page (shows all) use this file
 
+- name: Algorithmic Flora
+  image: assets/images/my_images/algorithmic-flora.png
+  url: demos/algorithmic-flora.html
+  description: "An interactive study in recursive botany using L-systems. Explore procedurally generated plants, ferns, and fractal forms rendered in a vintage botanical illustration style."
+
 - name: Neon Saber VR
   image: assets/images/my_images/neon-saber.png
   url: https://www.ashantanu.com/neon-saber/

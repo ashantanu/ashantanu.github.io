@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithmic Flora — A Study in Recursive Botany</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Spectral:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #f8f5eb;
+            --cream-dark: #ede8d8;
+            --ink: #1a1612;
+            --ink-light: #3d362d;
+            --botanical: #2d3a2d;
+            --copper: #8b5a3c;
+            --rust: #6b4423;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Spectral', Georgia, serif;
+            background: var(--cream);
+            color: var(--ink);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        /* Paper texture overlay */
+        .paper-texture {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10000;
+            opacity: 0.4;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        /* Title Section */
+        .title-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            position: relative;
+        }
+
+        .title-section::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: var(--ink);
+            opacity: 0.2;
+        }
+
+        .main-title {
+            font-family: 'Cormorant', Georgia, serif;
+            font-weight: 300;
+            font-size: clamp(3rem, 8vw, 6rem);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-family: 'Spectral', Georgia, serif;
+            font-weight: 300;
+            font-style: italic;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: var(--ink-light);
+            letter-spacing: 0.15em;
+        }
+
+        .title-ornament {
+            margin: 3rem 0;
+            font-size: 1.5rem;
+            letter-spacing: 0.5em;
+            color: var(--copper);
+            opacity: 0.6;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 3rem;
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--ink-light);
+            opacity: 0.5;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--ink);
+            border-radius: 50%;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot:hover,
+        .nav-dot.active {
+            background: var(--ink);
+        }
+
+        /* Specimen Pages */
+        .specimen-page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            padding: 4rem;
+            position: relative;
+        }
+
+        .specimen-page:nth-child(even) {
+            direction: rtl;
+        }
+
+        .specimen-page:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .specimen-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .specimen-canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1;
+        }
+
+        .specimen-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: zoom-in;
+        }
+
+        .specimen-canvas.interactive-3d {
+            cursor: grab;
+        }
+
+        .specimen-canvas.interactive-3d:active {
+            cursor: grabbing;
+        }
+
+        .specimen-info {
+            padding: 3rem;
+            max-width: 500px;
+        }
+
+        .specimen-number {
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--copper);
+            margin-bottom: 1rem;
+        }
+
+        .specimen-name {
+            font-family: 'Cormorant', Georgia, serif;
+            font-weight: 400;
+            font-size: 2.5rem;
+            font-style: italic;
+            color: var(--ink);
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+
+        .specimen-common {
+            font-family: 'Spectral', Georgia, serif;
+            font-weight: 300;
+            font-size: 1rem;
+            color: var(--ink-light);
+            margin-bottom: 2rem;
+        }
+
+        .specimen-description {
+            font-size: 0.95rem;
+            color: var(--ink-light);
+            margin-bottom: 2rem;
+            text-align: justify;
+        }
+
+        .specimen-rules {
+            border-top: 1px solid rgba(26, 22, 18, 0.15);
+            padding-top: 1.5rem;
+        }
+
+        .rule-item {
+            display: flex;
+            margin-bottom: 0.75rem;
+            font-family: 'Cormorant', Georgia, serif;
+        }
+
+        .rule-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--copper);
+            width: 100px;
+            flex-shrink: 0;
+            padding-top: 0.2rem;
+        }
+
+        .rule-value {
+            font-size: 1rem;
+            font-style: italic;
+            color: var(--ink);
+            font-family: 'Spectral', Georgia, serif;
+        }
+
+        /* Iteration indicator */
+        .iteration-display {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            color: var(--ink-light);
+            opacity: 0.6;
+        }
+
+        /* Zoom Modal */
+        .zoom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(248, 245, 235, 0.98);
+            z-index: 10001;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        .zoom-modal.active {
+            display: flex;
+        }
+
+        .zoom-canvas {
+            max-width: 90vmin;
+            max-height: 90vmin;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .zoom-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--ink-light);
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        /* Parametric Controls */
+        .param-controls {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(26, 22, 18, 0.1);
+        }
+
+        .param-slider {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .param-slider label {
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--copper);
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .param-slider input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 1px;
+            background: var(--ink-light);
+            opacity: 0.3;
+            outline: none;
+        }
+
+        .param-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--ink);
+            cursor: pointer;
+        }
+
+        .param-slider .param-value {
+            width: 50px;
+            text-align: right;
+            font-family: 'Spectral', Georgia, serif;
+            font-size: 0.85rem;
+            color: var(--ink-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .specimen-page {
+                grid-template-columns: 1fr;
+                padding: 2rem;
+            }
+
+            .specimen-page:nth-child(even) {
+                direction: ltr;
+            }
+
+            .nav {
+                display: none;
+            }
+        }
+
+        /* Section dividers */
+        .section-divider {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            font-family: 'Cormorant', Georgia, serif;
+            font-weight: 300;
+            font-size: 0.8rem;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: var(--ink-light);
+            position: relative;
+            padding: 0 3rem;
+        }
+
+        .section-title::before,
+        .section-title::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 60px;
+            height: 1px;
+            background: var(--ink);
+            opacity: 0.2;
+        }
+
+        .section-title::before {
+            right: 100%;
+        }
+
+        .section-title::after {
+            left: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="paper-texture"></div>
+
+    <nav class="nav" id="nav"></nav>
+
+    <section class="title-section">
+        <h1 class="main-title">Flora</h1>
+        <p class="subtitle">A Study in Recursive Botany</p>
+        <div class="title-ornament">✦</div>
+        <p class="subtitle" style="max-width: 500px; font-size: 0.9rem; opacity: 0.7;">
+            Being an illustrated compendium of botanical forms<br>
+            generated through the method of Lindenmayer Systems
+        </p>
+        <p class="scroll-hint">Scroll to observe growth</p>
+    </section>
+
+    <div id="specimens-container"></div>
+
+    <div class="zoom-modal" id="zoomModal">
+        <button class="zoom-close" onclick="closeZoom()">Close [Esc]</button>
+        <canvas class="zoom-canvas" id="zoomCanvas" width="1200" height="1200"></canvas>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-ornament">✦</div>
+        
+        <div class="footer-content">
+            <p class="footer-quote">
+                "From so simple a beginning endless forms<br>most beautiful and most wonderful have been,<br>and are being, evolved."
+            </p>
+            <p class="footer-attribution">— Charles Darwin, 1859</p>
+        </div>
+
+        <div class="footer-divider"></div>
+
+        <div class="colophon">
+            <h3 class="colophon-title">Colophon</h3>
+            <p>These specimens were cultivated using the L-System methodology first described by the Hungarian biologist <em>Aristid Lindenmayer</em> in 1968, originally devised for modelling the morphology of algae and the growth patterns of higher plants. The three-dimensional forms employ pitch and roll operators, projected isometrically to the plane.</p>
+            <p>The illustrations herein are rendered upon the HTML Canvas element through the interpretation of symbolic strings via the Turtle Graphics paradigm. The three-dimensional specimens employ the Three.js library for true volumetric rendering with real-time rotation—a digital homage to the copper plate engravings of naturalists past.</p>
+        </div>
+
+        <div class="footer-meta">
+            <div class="meta-item">
+                <span class="meta-label">Rendered</span>
+                <span class="meta-value">Anno Domini MMXXVI</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Medium</span>
+                <span class="meta-value">JavaScript & Canvas</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Specimens</span>
+                <span class="meta-value">XVIII Plates</span>
+            </div>
+        </div>
+
+        <div class="footer-finis">
+            <span class="finis-line"></span>
+            <span class="finis-text">Finis</span>
+            <span class="finis-line"></span>
+        </div>
+
+        <p class="footer-small">A study in recursive botany & algorithmic morphogenesis</p>
+    </footer>
+
+    <style>
+        .footer {
+            padding: 6rem 2rem;
+            text-align: center;
+            position: relative;
+            margin-top: 4rem;
+        }
+
+        .footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--ink), transparent);
+            opacity: 0.2;
+        }
+
+        .footer-ornament {
+            font-size: 1.5rem;
+            color: var(--copper);
+            opacity: 0.5;
+            margin-bottom: 3rem;
+            letter-spacing: 1em;
+        }
+
+        .footer-content {
+            max-width: 500px;
+            margin: 0 auto 3rem;
+        }
+
+        .footer-quote {
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 1.4rem;
+            font-style: italic;
+            font-weight: 300;
+            line-height: 1.8;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .footer-attribution {
+            font-family: 'Spectral', Georgia, serif;
+            font-size: 0.85rem;
+            color: var(--ink-light);
+            letter-spacing: 0.1em;
+        }
+
+        .footer-divider {
+            width: 60px;
+            height: 1px;
+            background: var(--copper);
+            margin: 3rem auto;
+            opacity: 0.4;
+        }
+
+        .colophon {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .colophon-title {
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 0.7rem;
+            font-weight: 400;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--copper);
+            margin-bottom: 1.5rem;
+        }
+
+        .colophon p {
+            font-family: 'Spectral', Georgia, serif;
+            font-size: 0.95rem;
+            font-weight: 300;
+            color: var(--ink-light);
+            line-height: 1.9;
+            margin-bottom: 1rem;
+            text-align: justify;
+            text-align-last: center;
+        }
+
+        .colophon em {
+            font-style: italic;
+            color: var(--ink);
+        }
+
+        .footer-meta {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .meta-label {
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--copper);
+        }
+
+        .meta-value {
+            font-family: 'Spectral', Georgia, serif;
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--ink-light);
+        }
+
+        .footer-finis {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 4rem 0 2rem;
+        }
+
+        .finis-line {
+            width: 80px;
+            height: 1px;
+            background: var(--ink);
+            opacity: 0.15;
+        }
+
+        .finis-text {
+            font-family: 'Cormorant', Georgia, serif;
+            font-size: 1.2rem;
+            font-style: italic;
+            font-weight: 300;
+            color: var(--ink);
+            letter-spacing: 0.3em;
+        }
+
+        .footer-small {
+            font-family: 'Spectral', Georgia, serif;
+            font-size: 0.75rem;
+            font-weight: 300;
+            color: var(--ink-light);
+            opacity: 0.6;
+            letter-spacing: 0.15em;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 600px) {
+            .footer-meta {
+                gap: 2rem;
+            }
+            
+            .footer-quote {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════
+        // ENGRAVING RENDERER - Creates copper plate aesthetic
+        // ═══════════════════════════════════════════════════════════════
+        
+        class EngravingRenderer {
+            constructor(ctx, options = {}) {
+                this.ctx = ctx;
+                this.lineColor = options.lineColor || '#1a1612';
+                this.lineWidth = options.lineWidth || 1.2;
+                this.stippleDensity = options.stippleDensity || 0.3;
+                this.hatching = options.hatching !== false;
+            }
+
+            drawLine(x1, y1, x2, y2, width = this.lineWidth) {
+                const ctx = this.ctx;
+                const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+                
+                // Main line with slight texture
+                ctx.beginPath();
+                ctx.strokeStyle = this.lineColor;
+                ctx.lineWidth = width;
+                ctx.lineCap = 'round';
+                
+                // Add subtle wobble for hand-drawn feel
+                const segments = Math.max(1, Math.floor(len / 8));
+                ctx.moveTo(x1, y1);
+                
+                for (let i = 1; i <= segments; i++) {
+                    const t = i / segments;
+                    const x = x1 + (x2 - x1) * t;
+                    const y = y1 + (y2 - y1) * t;
+                    const wobble = (Math.random() - 0.5) * 0.3;
+                    const perpX = -(y2 - y1) / len * wobble;
+                    const perpY = (x2 - x1) / len * wobble;
+                    ctx.lineTo(x + perpX, y + perpY);
+                }
+                
+                ctx.stroke();
+
+                // Add stippling along the line for texture
+                if (this.stippleDensity > 0 && len > 5) {
+                    this.addStippling(x1, y1, x2, y2, width);
+                }
+            }
+
+            addStippling(x1, y1, x2, y2, width) {
+                const ctx = this.ctx;
+                const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+                const numDots = Math.floor(len * this.stippleDensity * 0.5);
+                
+                ctx.fillStyle = this.lineColor;
+                
+                for (let i = 0; i < numDots; i++) {
+                    const t = Math.random();
+                    const spread = width * 1.5;
+                    const offset = (Math.random() - 0.5) * spread;
+                    
+                    const x = x1 + (x2 - x1) * t;
+                    const y = y1 + (y2 - y1) * t;
+                    
+                    const perpX = -(y2 - y1) / len * offset;
+                    const perpY = (x2 - x1) / len * offset;
+                    
+                    const dotSize = Math.random() * 0.8 + 0.2;
+                    ctx.globalAlpha = Math.random() * 0.3 + 0.1;
+                    ctx.beginPath();
+                    ctx.arc(x + perpX, y + perpY, dotSize, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            drawCircle(x, y, radius, filled = false) {
+                const ctx = this.ctx;
+                ctx.beginPath();
+                ctx.strokeStyle = this.lineColor;
+                ctx.lineWidth = this.lineWidth;
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                
+                if (filled) {
+                    ctx.fillStyle = this.lineColor;
+                    ctx.globalAlpha = 0.8;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                } else {
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // L-SYSTEM ENGINE
+        // ═══════════════════════════════════════════════════════════════
+
+        class LSystem {
+            constructor(config) {
+                this.axiom = config.axiom;
+                this.rules = config.rules;
+                this.angle = config.angle;
+                this.iterations = config.iterations;
+                this.length = config.length || 5;
+                this.lengthScale = config.lengthScale || 0.9;
+                this.widthScale = config.widthScale || 0.75;
+                this.startAngle = config.startAngle ?? -90;
+                this.startWidth = config.startWidth || 2;
+            }
+
+            generate(iterations = this.iterations) {
+                let current = this.axiom;
+                for (let i = 0; i < iterations; i++) {
+                    let next = '';
+                    for (let char of current) {
+                        next += this.rules[char] || char;
+                    }
+                    current = next;
+                }
+                return current;
+            }
+
+            calculateBounds(string, length) {
+                let x = 0, y = 0;
+                let angle = this.startAngle * Math.PI / 180;
+                let len = length;
+                const stack = [];
+                let minX = 0, maxX = 0, minY = 0, maxY = 0;
+
+                for (let char of string) {
+                    switch(char) {
+                        case 'F': case 'G': case 'A': case 'B':
+                            x += len * Math.cos(angle);
+                            y += len * Math.sin(angle);
+                            minX = Math.min(minX, x);
+                            maxX = Math.max(maxX, x);
+                            minY = Math.min(minY, y);
+                            maxY = Math.max(maxY, y);
+                            break;
+                        case '+': angle += this.angle * Math.PI / 180; break;
+                        case '-': angle -= this.angle * Math.PI / 180; break;
+                        case '[':
+                            stack.push({x, y, angle, len});
+                            len *= this.lengthScale;
+                            break;
+                        case ']':
+                            const state = stack.pop();
+                            if (state) { x = state.x; y = state.y; angle = state.angle; len = state.len; }
+                            break;
+                    }
+                }
+                return { minX, maxX, minY, maxY };
+            }
+
+            draw(canvas, iterations = this.iterations) {
+                const ctx = canvas.getContext('2d');
+                const renderer = new EngravingRenderer(ctx, {
+                    lineColor: '#1a1612',
+                    stippleDensity: 0.4
+                });
+
+                const string = this.generate(iterations);
+                const bounds = this.calculateBounds(string, this.length);
+                
+                const width = bounds.maxX - bounds.minX || 1;
+                const height = bounds.maxY - bounds.minY || 1;
+                const padding = 50;
+                const scaleX = (canvas.width - padding * 2) / width;
+                const scaleY = (canvas.height - padding * 2) / height;
+                const scale = Math.min(scaleX, scaleY);
+                const offsetX = padding - bounds.minX * scale + (canvas.width - padding * 2 - width * scale) / 2;
+                const offsetY = padding - bounds.minY * scale + (canvas.height - padding * 2 - height * scale) / 2;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                let x = 0, y = 0;
+                let angle = this.startAngle * Math.PI / 180;
+                let len = this.length;
+                let currentWidth = this.startWidth;
+                const stack = [];
+
+                for (let char of string) {
+                    switch(char) {
+                        case 'F': case 'G': case 'A': case 'B':
+                            const newX = x + len * Math.cos(angle);
+                            const newY = y + len * Math.sin(angle);
+                            renderer.drawLine(
+                                x * scale + offsetX,
+                                y * scale + offsetY,
+                                newX * scale + offsetX,
+                                newY * scale + offsetY,
+                                Math.max(0.5, currentWidth)
+                            );
+                            x = newX;
+                            y = newY;
+                            break;
+                        case 'f':
+                            x += len * Math.cos(angle);
+                            y += len * Math.sin(angle);
+                            break;
+                        case '+': angle += this.angle * Math.PI / 180; break;
+                        case '-': angle -= this.angle * Math.PI / 180; break;
+                        case '[':
+                            stack.push({x, y, angle, len, width: currentWidth});
+                            len *= this.lengthScale;
+                            currentWidth *= this.widthScale;
+                            break;
+                        case ']':
+                            const state = stack.pop();
+                            if (state) {
+                                x = state.x; y = state.y;
+                                angle = state.angle; len = state.len;
+                                currentWidth = state.width;
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PHYLLOTAXIS SYSTEM - Golden angle spirals
+        // ═══════════════════════════════════════════════════════════════
+
+        class PhyllotaxisSystem {
+            constructor(config) {
+                this.count = config.count || 200;
+                this.spread = config.spread || 8;
+                this.sizeBase = config.sizeBase || 6;
+                this.sizeVariation = config.sizeVariation || 0.5;
+                this.goldenAngle = 137.5077640500378; // degrees
+                this.type = config.type || 'dots'; // 'dots', 'seeds', 'florets'
+            }
+
+            draw(canvas, progress = 1) {
+                const ctx = canvas.getContext('2d');
+                const renderer = new EngravingRenderer(ctx, {
+                    lineColor: '#1a1612',
+                    stippleDensity: 0.5
+                });
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const numElements = Math.floor(this.count * progress);
+
+                for (let i = 0; i < numElements; i++) {
+                    const angle = i * this.goldenAngle * Math.PI / 180;
+                    const radius = this.spread * Math.sqrt(i);
+                    
+                    const x = centerX + radius * Math.cos(angle);
+                    const y = centerY + radius * Math.sin(angle);
+                    
+                    // Size decreases toward center for sunflower effect
+                    const normalizedR = radius / (this.spread * Math.sqrt(this.count));
+                    const size = this.sizeBase * (0.3 + normalizedR * this.sizeVariation);
+
+                    if (this.type === 'seeds') {
+                        this.drawSeed(ctx, renderer, x, y, size, angle);
+                    } else if (this.type === 'florets') {
+                        this.drawFloret(ctx, renderer, x, y, size, angle);
+                    } else {
+                        renderer.drawCircle(x, y, size, true);
+                    }
+                }
+            }
+
+            drawSeed(ctx, renderer, x, y, size, angle) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle + Math.PI / 2);
+                
+                ctx.beginPath();
+                ctx.ellipse(0, 0, size * 0.5, size, 0, 0, Math.PI * 2);
+                ctx.strokeStyle = '#1a1612';
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+                
+                // Inner line
+                ctx.beginPath();
+                ctx.moveTo(0, -size * 0.6);
+                ctx.lineTo(0, size * 0.6);
+                ctx.strokeStyle = '#1a1612';
+                ctx.lineWidth = 0.5;
+                ctx.globalAlpha = 0.5;
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+                
+                ctx.restore();
+            }
+
+            drawFloret(ctx, renderer, x, y, size, angle) {
+                const petals = 5;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                
+                ctx.strokeStyle = '#1a1612';
+                ctx.lineWidth = 0.6;
+                
+                for (let i = 0; i < petals; i++) {
+                    const petalAngle = (i / petals) * Math.PI * 2;
+                    ctx.beginPath();
+                    ctx.ellipse(
+                        Math.cos(petalAngle) * size * 0.3,
+                        Math.sin(petalAngle) * size * 0.3,
+                        size * 0.4, size * 0.2,
+                        petalAngle, 0, Math.PI * 2
+                    );
+                    ctx.stroke();
+                }
+                
+                // Center
+                renderer.drawCircle(0, 0, size * 0.2, true);
+                
+                ctx.restore();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // THREE.JS 3D L-SYSTEM RENDERER
+        // ═══════════════════════════════════════════════════════════════
+
+        // Load Three.js
+        const threeScript = document.createElement('script');
+        threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        document.head.appendChild(threeScript);
+
+        class LSystem3DThree {
+            constructor(config) {
+                this.axiom = config.axiom;
+                this.rules = config.rules;
+                this.angle = config.angle;
+                this.iterations = config.iterations;
+                this.length = config.length || 5;
+                this.lengthScale = config.lengthScale || 0.85;
+                this.widthScale = config.widthScale || 0.7;
+                this.startWidth = config.startWidth || 0.3;
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.lines = [];
+                this.isInitialized = false;
+                this.animationId = null;
+                this.autoRotate = config.autoRotate !== false;
+                this.rotationSpeed = config.rotationSpeed || 0.002;
+            }
+
+            generate(iterations = this.iterations) {
+                let current = this.axiom;
+                for (let i = 0; i < iterations; i++) {
+                    let next = '';
+                    for (let char of current) {
+                        next += this.rules[char] || char;
+                    }
+                    current = next;
+                }
+                return current;
+            }
+
+            init(canvas) {
+                if (typeof THREE === 'undefined') {
+                    setTimeout(() => this.init(canvas), 100);
+                    return;
+                }
+
+                const width = canvas.clientWidth || 500;
+                const height = canvas.clientHeight || 500;
+
+                // Scene
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0xf8f5eb);
+
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+                this.camera.position.set(0, 0, 100);
+
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas,
+                    antialias: true,
+                    alpha: true
+                });
+                this.renderer.setSize(width, height);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+                // Lighting for depth perception
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                this.scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+                directionalLight.position.set(50, 50, 50);
+                this.scene.add(directionalLight);
+
+                // Add subtle fog for atmospheric depth
+                this.scene.fog = new THREE.Fog(0xf8f5eb, 80, 200);
+
+                this.isInitialized = true;
+                
+                // Mouse interaction
+                this.setupMouseControls(canvas);
+            }
+
+            setupMouseControls(canvas) {
+                let isDragging = false;
+                let previousMousePosition = { x: 0, y: 0 };
+                let rotationX = 0;
+                let rotationY = 0;
+
+                canvas.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    this.autoRotate = false;
+                    previousMousePosition = { x: e.offsetX, y: e.offsetY };
+                });
+
+                canvas.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const deltaMove = {
+                        x: e.offsetX - previousMousePosition.x,
+                        y: e.offsetY - previousMousePosition.y
+                    };
+
+                    if (this.treeGroup) {
+                        this.treeGroup.rotation.y += deltaMove.x * 0.01;
+                        this.treeGroup.rotation.x += deltaMove.y * 0.01;
+                    }
+
+                    previousMousePosition = { x: e.offsetX, y: e.offsetY };
+                });
+
+                canvas.addEventListener('mouseup', () => isDragging = false);
+                canvas.addEventListener('mouseleave', () => isDragging = false);
+
+                canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    this.camera.position.z += e.deltaY * 0.1;
+                    this.camera.position.z = Math.max(30, Math.min(200, this.camera.position.z));
+                });
+
+                previousMousePosition = { x: 0, y: 0 };
+            }
+
+            buildTree(iterations = this.iterations) {
+                const string = this.generate(iterations);
+                
+                // Create group for the tree
+                this.treeGroup = new THREE.Group();
+                
+                // Turtle state
+                let pos = new THREE.Vector3(0, 0, 0);
+                let heading = new THREE.Vector3(0, 1, 0);
+                let left = new THREE.Vector3(-1, 0, 0);
+                let up = new THREE.Vector3(0, 0, 1);
+                
+                const stack = [];
+                let len = this.length;
+                let width = this.startWidth;
+                
+                const angleRad = this.angle * Math.PI / 180;
+                
+                // Material for branches - ink-like appearance
+                const branchMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x1a1612,
+                    transparent: true,
+                    opacity: 0.9
+                });
+
+                const rotateAroundAxis = (vec, axis, angle) => {
+                    const q = new THREE.Quaternion();
+                    q.setFromAxisAngle(axis.clone().normalize(), angle);
+                    return vec.clone().applyQuaternion(q);
+                };
+
+                for (let char of string) {
+                    switch(char) {
+                        case 'F':
+                        case 'G':
+                            const newPos = pos.clone().add(heading.clone().multiplyScalar(len));
+                            
+                            // Create cylinder for branch
+                            const branchLength = len;
+                            const geometry = new THREE.CylinderGeometry(
+                                width * 0.7, // top radius
+                                width,        // bottom radius
+                                branchLength, // height
+                                6             // segments
+                            );
+                            
+                            const branch = new THREE.Mesh(geometry, branchMaterial);
+                            
+                            // Position and orient the branch
+                            const midpoint = pos.clone().add(newPos).multiplyScalar(0.5);
+                            branch.position.copy(midpoint);
+                            
+                            // Align cylinder to heading direction
+                            const defaultDir = new THREE.Vector3(0, 1, 0);
+                            const quaternion = new THREE.Quaternion();
+                            quaternion.setFromUnitVectors(defaultDir, heading.clone().normalize());
+                            branch.quaternion.copy(quaternion);
+                            
+                            this.treeGroup.add(branch);
+                            pos = newPos;
+                            break;
+                            
+                        case 'f':
+                            pos = pos.clone().add(heading.clone().multiplyScalar(len));
+                            break;
+                            
+                        case '+': // Turn left (yaw)
+                            heading = rotateAroundAxis(heading, up, angleRad);
+                            left = rotateAroundAxis(left, up, angleRad);
+                            break;
+                            
+                        case '-': // Turn right (yaw)
+                            heading = rotateAroundAxis(heading, up, -angleRad);
+                            left = rotateAroundAxis(left, up, -angleRad);
+                            break;
+                            
+                        case '&': // Pitch down
+                            heading = rotateAroundAxis(heading, left, angleRad);
+                            up = rotateAroundAxis(up, left, angleRad);
+                            break;
+                            
+                        case '^': // Pitch up
+                            heading = rotateAroundAxis(heading, left, -angleRad);
+                            up = rotateAroundAxis(up, left, -angleRad);
+                            break;
+                            
+                        case '\\': // Roll left
+                            left = rotateAroundAxis(left, heading, angleRad);
+                            up = rotateAroundAxis(up, heading, angleRad);
+                            break;
+                            
+                        case '/': // Roll right
+                            left = rotateAroundAxis(left, heading, -angleRad);
+                            up = rotateAroundAxis(up, heading, -angleRad);
+                            break;
+                            
+                        case '|': // Turn around
+                            heading.negate();
+                            left.negate();
+                            break;
+                            
+                        case '[':
+                            stack.push({
+                                pos: pos.clone(),
+                                heading: heading.clone(),
+                                left: left.clone(),
+                                up: up.clone(),
+                                len, width
+                            });
+                            len *= this.lengthScale;
+                            width *= this.widthScale;
+                            break;
+                            
+                        case ']':
+                            const state = stack.pop();
+                            if (state) {
+                                pos = state.pos;
+                                heading = state.heading;
+                                left = state.left;
+                                up = state.up;
+                                len = state.len;
+                                width = state.width;
+                            }
+                            break;
+                    }
+                }
+
+                // Center the tree
+                const box = new THREE.Box3().setFromObject(this.treeGroup);
+                const center = box.getCenter(new THREE.Vector3());
+                this.treeGroup.position.sub(center);
+                
+                // Scale to fit
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 40 / maxDim;
+                this.treeGroup.scale.setScalar(scale);
+
+                this.scene.add(this.treeGroup);
+            }
+
+            draw(canvas, iterations = this.iterations) {
+                if (!this.isInitialized) {
+                    this.init(canvas);
+                    setTimeout(() => this.draw(canvas, iterations), 150);
+                    return;
+                }
+
+                // Clear previous tree
+                if (this.treeGroup) {
+                    this.scene.remove(this.treeGroup);
+                    this.treeGroup.traverse((child) => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) child.material.dispose();
+                    });
+                }
+
+                this.buildTree(iterations);
+                this.animate();
+            }
+
+            animate() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+
+                const render = () => {
+                    this.animationId = requestAnimationFrame(render);
+                    
+                    if (this.autoRotate && this.treeGroup) {
+                        this.treeGroup.rotation.y += this.rotationSpeed;
+                    }
+                    
+                    this.renderer.render(this.scene, this.camera);
+                };
+                
+                render();
+            }
+
+            dispose() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+                if (this.renderer) {
+                    this.renderer.dispose();
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // 3D L-SYSTEM - With pitch, roll, and isometric projection
+        // ═══════════════════════════════════════════════════════════════
+
+        class LSystem3D {
+            constructor(config) {
+                this.axiom = config.axiom;
+                this.rules = config.rules;
+                this.angle = config.angle;
+                this.iterations = config.iterations;
+                this.length = config.length || 5;
+                this.lengthScale = config.lengthScale || 0.9;
+                this.widthScale = config.widthScale || 0.75;
+                this.startWidth = config.startWidth || 2;
+                this.projection = config.projection || 'isometric'; // 'isometric' or 'perspective'
+                this.rotationX = config.rotationX || 0;
+                this.rotationY = config.rotationY || 0;
+                this.rotationZ = config.rotationZ || 0;
+            }
+
+            generate(iterations = this.iterations) {
+                let current = this.axiom;
+                for (let i = 0; i < iterations; i++) {
+                    let next = '';
+                    for (let char of current) {
+                        next += this.rules[char] || char;
+                    }
+                    current = next;
+                }
+                return current;
+            }
+
+            // Rotation matrices
+            rotateX(vec, angle) {
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                return {
+                    x: vec.x,
+                    y: vec.y * cos - vec.z * sin,
+                    z: vec.y * sin + vec.z * cos
+                };
+            }
+
+            rotateY(vec, angle) {
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                return {
+                    x: vec.x * cos + vec.z * sin,
+                    y: vec.y,
+                    z: -vec.x * sin + vec.z * cos
+                };
+            }
+
+            rotateZ(vec, angle) {
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                return {
+                    x: vec.x * cos - vec.y * sin,
+                    y: vec.x * sin + vec.y * cos,
+                    z: vec.z
+                };
+            }
+
+            // Project 3D to 2D
+            project(point) {
+                // Apply global rotation for viewing angle
+                let p = { ...point };
+                p = this.rotateX(p, this.rotationX * Math.PI / 180);
+                p = this.rotateY(p, this.rotationY * Math.PI / 180);
+                p = this.rotateZ(p, this.rotationZ * Math.PI / 180);
+
+                if (this.projection === 'perspective') {
+                    const fov = 500;
+                    const scale = fov / (fov + p.z);
+                    return { x: p.x * scale, y: p.y * scale, z: p.z };
+                } else {
+                    // Isometric projection
+                    return {
+                        x: (p.x - p.z) * Math.cos(Math.PI / 6),
+                        y: p.y + (p.x + p.z) * Math.sin(Math.PI / 6) * 0.5,
+                        z: p.z
+                    };
+                }
+            }
+
+            draw(canvas, iterations = this.iterations) {
+                const ctx = canvas.getContext('2d');
+                const renderer = new EngravingRenderer(ctx, {
+                    lineColor: '#1a1612',
+                    stippleDensity: 0.35
+                });
+
+                const string = this.generate(iterations);
+                
+                // Turtle state in 3D
+                let pos = { x: 0, y: 0, z: 0 };
+                // Direction vectors (heading, left, up)
+                let H = { x: 0, y: -1, z: 0 }; // heading (up in Y)
+                let L = { x: -1, y: 0, z: 0 }; // left
+                let U = { x: 0, y: 0, z: 1 };  // up (out of screen)
+                
+                const stack = [];
+                let len = this.length;
+                let width = this.startWidth;
+                const lines = [];
+
+                const angleRad = this.angle * Math.PI / 180;
+
+                // Helper to rotate around an axis
+                const rotateAroundAxis = (vec, axis, angle) => {
+                    const cos = Math.cos(angle);
+                    const sin = Math.sin(angle);
+                    const dot = vec.x * axis.x + vec.y * axis.y + vec.z * axis.z;
+                    return {
+                        x: vec.x * cos + (axis.y * vec.z - axis.z * vec.y) * sin + axis.x * dot * (1 - cos),
+                        y: vec.y * cos + (axis.z * vec.x - axis.x * vec.z) * sin + axis.y * dot * (1 - cos),
+                        z: vec.z * cos + (axis.x * vec.y - axis.y * vec.x) * sin + axis.z * dot * (1 - cos)
+                    };
+                };
+
+                for (let char of string) {
+                    switch(char) {
+                        case 'F':
+                        case 'G':
+                            const newPos = {
+                                x: pos.x + H.x * len,
+                                y: pos.y + H.y * len,
+                                z: pos.z + H.z * len
+                            };
+                            lines.push({ from: {...pos}, to: {...newPos}, width });
+                            pos = newPos;
+                            break;
+                        case 'f':
+                            pos = {
+                                x: pos.x + H.x * len,
+                                y: pos.y + H.y * len,
+                                z: pos.z + H.z * len
+                            };
+                            break;
+                        case '+': // Turn left (yaw)
+                            H = rotateAroundAxis(H, U, angleRad);
+                            L = rotateAroundAxis(L, U, angleRad);
+                            break;
+                        case '-': // Turn right (yaw)
+                            H = rotateAroundAxis(H, U, -angleRad);
+                            L = rotateAroundAxis(L, U, -angleRad);
+                            break;
+                        case '&': // Pitch down
+                            H = rotateAroundAxis(H, L, angleRad);
+                            U = rotateAroundAxis(U, L, angleRad);
+                            break;
+                        case '^': // Pitch up
+                            H = rotateAroundAxis(H, L, -angleRad);
+                            U = rotateAroundAxis(U, L, -angleRad);
+                            break;
+                        case '\\': // Roll left
+                            L = rotateAroundAxis(L, H, angleRad);
+                            U = rotateAroundAxis(U, H, angleRad);
+                            break;
+                        case '/': // Roll right
+                            L = rotateAroundAxis(L, H, -angleRad);
+                            U = rotateAroundAxis(U, H, -angleRad);
+                            break;
+                        case '|': // Turn around
+                            H = { x: -H.x, y: -H.y, z: -H.z };
+                            L = { x: -L.x, y: -L.y, z: -L.z };
+                            break;
+                        case '[':
+                            stack.push({
+                                pos: {...pos},
+                                H: {...H}, L: {...L}, U: {...U},
+                                len, width
+                            });
+                            len *= this.lengthScale;
+                            width *= this.widthScale;
+                            break;
+                        case ']':
+                            const state = stack.pop();
+                            if (state) {
+                                pos = state.pos;
+                                H = state.H; L = state.L; U = state.U;
+                                len = state.len; width = state.width;
+                            }
+                            break;
+                    }
+                }
+
+                // Calculate bounds of projected points
+                let minX = Infinity, maxX = -Infinity;
+                let minY = Infinity, maxY = -Infinity;
+                
+                const projectedLines = lines.map(line => ({
+                    from: this.project(line.from),
+                    to: this.project(line.to),
+                    width: line.width,
+                    z: (line.from.z + line.to.z) / 2
+                }));
+
+                projectedLines.forEach(line => {
+                    minX = Math.min(minX, line.from.x, line.to.x);
+                    maxX = Math.max(maxX, line.from.x, line.to.x);
+                    minY = Math.min(minY, line.from.y, line.to.y);
+                    maxY = Math.max(maxY, line.from.y, line.to.y);
+                });
+
+                // Calculate scale and offset
+                const width2d = maxX - minX || 1;
+                const height2d = maxY - minY || 1;
+                const padding = 50;
+                const scaleX = (canvas.width - padding * 2) / width2d;
+                const scaleY = (canvas.height - padding * 2) / height2d;
+                const scale = Math.min(scaleX, scaleY);
+                const offsetX = padding - minX * scale + (canvas.width - padding * 2 - width2d * scale) / 2;
+                const offsetY = padding - minY * scale + (canvas.height - padding * 2 - height2d * scale) / 2;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Sort by Z for depth ordering (painter's algorithm)
+                projectedLines.sort((a, b) => b.z - a.z);
+
+                // Draw lines
+                projectedLines.forEach(line => {
+                    // Depth-based opacity for atmospheric perspective
+                    const depthFade = Math.max(0.3, 1 - (line.z / 200) * 0.3);
+                    renderer.lineColor = `rgba(26, 22, 18, ${depthFade})`;
+                    
+                    renderer.drawLine(
+                        line.from.x * scale + offsetX,
+                        line.from.y * scale + offsetY,
+                        line.to.x * scale + offsetX,
+                        line.to.y * scale + offsetY,
+                        Math.max(0.4, line.width * depthFade)
+                    );
+                });
+                
+                renderer.lineColor = '#1a1612';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PARAMETRIC L-SYSTEM
+        // ═══════════════════════════════════════════════════════════════
+
+        class ParametricLSystem {
+            constructor(config) {
+                this.axiom = config.axiom; // e.g., "F(1,0.1)"
+                this.rules = config.rules; // Function that takes params and returns new string
+                this.angle = config.angle;
+                this.iterations = config.iterations;
+                this.startAngle = config.startAngle ?? -90;
+                this.baseLength = config.baseLength || 100;
+                this.baseWidth = config.baseWidth || 3;
+                
+                // Parametric controls
+                this.params = config.params || {};
+            }
+
+            // Parse parametric string like "F(1,0.1)A(0.5)" 
+            parse(str) {
+                const tokens = [];
+                let i = 0;
+                while (i < str.length) {
+                    const char = str[i];
+                    if (str[i+1] === '(') {
+                        // Find closing paren
+                        let j = i + 2;
+                        while (j < str.length && str[j] !== ')') j++;
+                        const params = str.substring(i+2, j).split(',').map(Number);
+                        tokens.push({ symbol: char, params });
+                        i = j + 1;
+                    } else {
+                        tokens.push({ symbol: char, params: [] });
+                        i++;
+                    }
+                }
+                return tokens;
+            }
+
+            generate(iterations = this.iterations) {
+                let tokens = this.parse(this.axiom);
+                
+                for (let iter = 0; iter < iterations; iter++) {
+                    let newTokens = [];
+                    for (const token of tokens) {
+                        const replacement = this.rules(token.symbol, token.params, this.params);
+                        if (replacement) {
+                            newTokens = newTokens.concat(this.parse(replacement));
+                        } else {
+                            newTokens.push(token);
+                        }
+                    }
+                    tokens = newTokens;
+                }
+                return tokens;
+            }
+
+            draw(canvas, iterations = this.iterations) {
+                const ctx = canvas.getContext('2d');
+                const renderer = new EngravingRenderer(ctx, {
+                    lineColor: '#1a1612',
+                    stippleDensity: 0.4
+                });
+
+                const tokens = this.generate(iterations);
+                
+                // First pass: calculate bounds
+                let x = 0, y = 0;
+                let angle = this.startAngle * Math.PI / 180;
+                const stack = [];
+                let minX = 0, maxX = 0, minY = 0, maxY = 0;
+
+                for (const token of tokens) {
+                    const len = token.params[0] !== undefined ? token.params[0] * this.baseLength : this.baseLength * 0.1;
+                    switch(token.symbol) {
+                        case 'F':
+                            x += len * Math.cos(angle);
+                            y += len * Math.sin(angle);
+                            minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+                            minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+                            break;
+                        case '+': angle += this.angle * Math.PI / 180; break;
+                        case '-': angle -= this.angle * Math.PI / 180; break;
+                        case '[': stack.push({x, y, angle}); break;
+                        case ']': 
+                            const s = stack.pop();
+                            if (s) { x = s.x; y = s.y; angle = s.angle; }
+                            break;
+                    }
+                }
+
+                // Calculate transform
+                const width = maxX - minX || 1;
+                const height = maxY - minY || 1;
+                const padding = 50;
+                const scaleX = (canvas.width - padding * 2) / width;
+                const scaleY = (canvas.height - padding * 2) / height;
+                const scale = Math.min(scaleX, scaleY);
+                const offsetX = padding - minX * scale + (canvas.width - padding * 2 - width * scale) / 2;
+                const offsetY = padding - minY * scale + (canvas.height - padding * 2 - height * scale) / 2;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Second pass: draw
+                x = 0; y = 0;
+                angle = this.startAngle * Math.PI / 180;
+                stack.length = 0;
+
+                for (const token of tokens) {
+                    const len = token.params[0] !== undefined ? token.params[0] * this.baseLength : this.baseLength * 0.1;
+                    const wid = token.params[1] !== undefined ? token.params[1] * this.baseWidth : this.baseWidth * 0.1;
+                    
+                    switch(token.symbol) {
+                        case 'F':
+                            const newX = x + len * Math.cos(angle);
+                            const newY = y + len * Math.sin(angle);
+                            renderer.drawLine(
+                                x * scale + offsetX, y * scale + offsetY,
+                                newX * scale + offsetX, newY * scale + offsetY,
+                                Math.max(0.3, wid * scale * 0.1)
+                            );
+                            x = newX; y = newY;
+                            break;
+                        case '+': angle += this.angle * Math.PI / 180; break;
+                        case '-': angle -= this.angle * Math.PI / 180; break;
+                        case '[': stack.push({x, y, angle}); break;
+                        case ']':
+                            const s = stack.pop();
+                            if (s) { x = s.x; y = s.y; angle = s.angle; }
+                            break;
+                    }
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SPECIMEN DEFINITIONS
+        // ═══════════════════════════════════════════════════════════════
+
+        const specimens = [
+            // PHYLLOTAXIS
+            {
+                section: "Phyllotaxis",
+                name: "Helianthus Aureus",
+                common: "The Sunflower Spiral",
+                description: "The golden angle of 137.5° governs the arrangement of seeds upon the flower head, each seed positioned to maximize exposure to light and rain. This angle, derived from the golden ratio, appears throughout the natural world as nature's most efficient packing solution.",
+                type: "phyllotaxis",
+                config: { count: 300, spread: 7, sizeBase: 5, sizeVariation: 0.7, type: 'seeds' },
+                rules: { axiom: "Golden Angle", rule: "θ = 137.5077°", angle: "137.5°" }
+            },
+            {
+                name: "Bellis Spiralis",
+                common: "The Daisy Florets",
+                description: "The composite flower head arranges its florets in intersecting spirals—typically 21 clockwise and 34 counter-clockwise, both Fibonacci numbers. This mathematical poetry written in petals.",
+                type: "phyllotaxis",
+                config: { count: 250, spread: 6, sizeBase: 8, sizeVariation: 0.6, type: 'florets' },
+                rules: { axiom: "Golden Angle", rule: "θ = 137.5077°", angle: "137.5°" }
+            },
+
+            // TREES
+            {
+                section: "Arboreal Forms",
+                name: "Quercus Fractalis",
+                common: "The Fractal Oak",
+                description: "A majestic branching form wherein each bifurcation repeats the pattern of the whole. The recursive nature of this growth produces the familiar silhouette of the great oaks, each branch a diminished echo of the trunk from which it springs.",
+                type: "lsystem",
+                config: {
+                    axiom: "F",
+                    rules: { "F": "FF+[+F-F-F]-[-F+F+F]" },
+                    angle: 22.5,
+                    iterations: 4,
+                    length: 8,
+                    startWidth: 3,
+                    lengthScale: 0.9,
+                    widthScale: 0.7
+                },
+                rules: { axiom: "F", rule: "F → FF+[+F−F−F]−[−F+F+F]", angle: "22.5°" }
+            },
+            {
+                name: "Salix Pendula",
+                common: "The Weeping Willow",
+                description: "Graceful pendulous growth characterizes this form, the branches descending in gentle arcs as if weighted by melancholy. The narrow branching angle produces the distinctive curtain-like silhouette.",
+                type: "lsystem",
+                config: {
+                    axiom: "F",
+                    rules: { "F": "F[+F]F[-F]F" },
+                    angle: 25.7,
+                    iterations: 5,
+                    length: 6,
+                    startWidth: 2.5,
+                    lengthScale: 0.85
+                },
+                rules: { axiom: "F", rule: "F → F[+F]F[−F]F", angle: "25.7°" }
+            },
+            {
+                name: "Pinus Recursiva",
+                common: "The Recursive Conifer",
+                description: "The coniferous form, with its whorled branch arrangement and upward-reaching habit. Each node produces multiple branches at regular intervals, creating the pyramidal silhouette characteristic of the pine family.",
+                type: "lsystem",
+                config: {
+                    axiom: "F",
+                    rules: { "F": "F[+F]F[-F][F]" },
+                    angle: 20,
+                    iterations: 5,
+                    length: 7,
+                    startWidth: 2,
+                    lengthScale: 0.88
+                },
+                rules: { axiom: "F", rule: "F → F[+F]F[−F][F]", angle: "20°" }
+            },
+
+            // FERNS
+            {
+                section: "Ferns & Fronds",
+                name: "Filicophyta Prima",
+                common: "The Archetypal Fern",
+                description: "The fern frond unfurls according to ancient recursive law, each pinna bearing pinnules that mirror the whole. This self-similarity across scales—the signature of fractal geometry—was old when the dinosaurs walked.",
+                type: "lsystem",
+                config: {
+                    axiom: "F",
+                    rules: { "F": "F[-F]F[+F][F]" },
+                    angle: 22.5,
+                    iterations: 5,
+                    length: 8,
+                    startWidth: 2,
+                    lengthScale: 0.85
+                },
+                rules: { axiom: "F", rule: "F → F[−F]F[+F][F]", angle: "22.5°" }
+            },
+            {
+                name: "Dryopteris Densa",
+                common: "The Shield Fern",
+                description: "Dense foliage emerges from the complex interaction of branching rules, the fronds overlapping to form the characteristic shuttlecock arrangement. Each generation adds new detail while preserving the essential form.",
+                type: "lsystem",
+                config: {
+                    axiom: "F",
+                    rules: { "F": "FF-[+F-F+F]+[-F+F-F]" },
+                    angle: 22.5,
+                    iterations: 4,
+                    length: 7,
+                    startWidth: 2.5,
+                    lengthScale: 0.9
+                },
+                rules: { axiom: "F", rule: "F → FF−[+F−F+F]+[−F+F−F]", angle: "22.5°" }
+            },
+
+            // PARAMETRIC
+            {
+                section: "Parametric Forms",
+                name: "Arbor Parametrica",
+                common: "The Parametric Tree",
+                description: "A tree whose growth is governed by continuous parameters—length and thickness passed down through generations, diminishing with each branching. Adjust the controls to observe how small changes in growth factors produce dramatically different forms.",
+                type: "parametric",
+                config: {
+                    axiom: "F(1,1)",
+                    rules: (symbol, params, globalParams) => {
+                        if (symbol === 'F' && params.length >= 2) {
+                            const [l, w] = params;
+                            const lf = globalParams.lengthFactor || 0.75;
+                            const wf = globalParams.widthFactor || 0.65;
+                            const nl = (l * lf).toFixed(3);
+                            const nw = (w * wf).toFixed(3);
+                            return `F(${l},${w})[+F(${nl},${nw})][-F(${nl},${nw})]`;
+                        }
+                        return null;
+                    },
+                    angle: 30,
+                    iterations: 7,
+                    baseLength: 120,
+                    baseWidth: 15,
+                    params: { lengthFactor: 0.75, widthFactor: 0.65 }
+                },
+                rules: { axiom: "F(l,w)", rule: "F(l,w) → F(l,w)[+F(l·λ,w·ω)][−F(l·λ,w·ω)]", angle: "30°" },
+                parametric: true,
+                paramControls: [
+                    { name: 'lengthFactor', label: 'Length λ', min: 0.5, max: 0.95, step: 0.01, default: 0.75 },
+                    { name: 'widthFactor', label: 'Width ω', min: 0.4, max: 0.9, step: 0.01, default: 0.65 },
+                    { name: 'angle', label: 'Angle θ', min: 15, max: 45, step: 1, default: 30, isAngle: true }
+                ]
+            },
+            {
+                name: "Herba Continua",
+                common: "The Continuous Grass",
+                description: "Parametric growth applied to a grass-like form. The gentle angle and high length preservation create tall, sweeping stems. The width parameter controls the delicacy of each blade.",
+                type: "parametric",
+                config: {
+                    axiom: "F(1,1)",
+                    rules: (symbol, params, globalParams) => {
+                        if (symbol === 'F' && params.length >= 2) {
+                            const [l, w] = params;
+                            const lf = globalParams.lengthFactor || 0.85;
+                            const wf = globalParams.widthFactor || 0.7;
+                            const nl = (l * lf).toFixed(3);
+                            const nw = (w * wf).toFixed(3);
+                            return `F(${l},${w})[+F(${nl},${nw})]F(${nl},${nw})[-F(${nl},${nw})]`;
+                        }
+                        return null;
+                    },
+                    angle: 18,
+                    iterations: 5,
+                    baseLength: 100,
+                    baseWidth: 12,
+                    params: { lengthFactor: 0.85, widthFactor: 0.7 }
+                },
+                rules: { axiom: "F(l,w)", rule: "F(l,w) → F[+F(λ,ω)]F(λ,ω)[−F(λ,ω)]", angle: "18°" },
+                parametric: true,
+                paramControls: [
+                    { name: 'lengthFactor', label: 'Length λ', min: 0.6, max: 0.95, step: 0.01, default: 0.85 },
+                    { name: 'widthFactor', label: 'Width ω', min: 0.4, max: 0.9, step: 0.01, default: 0.7 },
+                    { name: 'angle', label: 'Angle θ', min: 10, max: 35, step: 1, default: 18, isAngle: true }
+                ]
+            },
+
+            // CURVES
+            {
+                section: "Mathematical Forms",
+                name: "Draco Curvatus",
+                common: "The Dragon Curve",
+                description: "Neither plant nor animal, yet suggestive of organic form—the dragon curve emerges from the simplest of rules. Fold a strip of paper in half repeatedly, then unfold: this is the shape that results. Nature finds uses for such forms in coastlines and lightning.",
+                type: "lsystem",
+                config: {
+                    axiom: "F",
+                    rules: { "F": "F+G+", "G": "-F-G" },
+                    angle: 90,
+                    iterations: 12,
+                    length: 5,
+                    startAngle: 0,
+                    startWidth: 1.2
+                },
+                rules: { axiom: "F", rule: "F → F+G+ ; G → −F−G", angle: "90°" }
+            },
+            {
+                name: "Kochii Nivalis",
+                common: "The Koch Snowflake",
+                description: "A curve of infinite length enclosing finite area—such is the paradox of the Koch snowflake. Each iteration adds detail at ever-smaller scales, producing the crystalline complexity seen in actual snowflakes and certain radiolarian skeletons.",
+                type: "lsystem",
+                config: {
+                    axiom: "F++F++F",
+                    rules: { "F": "F-F++F-F" },
+                    angle: 60,
+                    iterations: 4,
+                    length: 4,
+                    startAngle: 0,
+                    startWidth: 1
+                },
+                rules: { axiom: "F++F++F", rule: "F → F−F++F−F", angle: "60°" }
+            },
+
+            // 3D SYSTEMS - THREE.JS
+            {
+                section: "Three-Dimensional Forms",
+                name: "Corallium Fractale",
+                common: "The Fractal Coral",
+                description: "Marine organisms too obey recursive law. This coral form branches in all dimensions equally, seeking light and nutrients from the surrounding water. Rotate to appreciate the full three-dimensional structure.",
+                type: "lsystem3d-three",
+                config: {
+                    axiom: "F",
+                    rules: { "F": "F[+F][−F][&F][^F]" },
+                    angle: 28,
+                    iterations: 5,
+                    length: 8,
+                    startWidth: 0.35,
+                    lengthScale: 0.72,
+                    widthScale: 0.7,
+                    autoRotate: true,
+                    rotationSpeed: 0.002
+                },
+                rules: { axiom: "F", rule: "F → F[+F][−F][&F][^F]", angle: "28°" }
+            }
+        ];
+
+        // ═══════════════════════════════════════════════════════════════
+        // PAGE GENERATION
+        // ═══════════════════════════════════════════════════════════════
+
+        const container = document.getElementById('specimens-container');
+        const nav = document.getElementById('nav');
+        const specimenInstances = [];
+
+        specimens.forEach((specimen, index) => {
+            // Section divider
+            if (specimen.section) {
+                const divider = document.createElement('div');
+                divider.className = 'section-divider';
+                divider.innerHTML = `<h2 class="section-title">${specimen.section}</h2>`;
+                container.appendChild(divider);
+            }
+
+            // Create page
+            const page = document.createElement('section');
+            page.className = 'specimen-page';
+            page.id = `specimen-${index}`;
+            
+            const paramControlsHTML = specimen.parametric ? `
+                <div class="param-controls" id="params-${index}">
+                    ${specimen.paramControls.map(p => `
+                        <div class="param-slider">
+                            <label>${p.label}</label>
+                            <input type="range" 
+                                   min="${p.min}" max="${p.max}" step="${p.step}" 
+                                   value="${p.default}"
+                                   data-param="${p.name}"
+                                   data-index="${index}"
+                                   data-is-angle="${p.isAngle || false}">
+                            <span class="param-value">${p.default}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            page.innerHTML = `
+                <div class="specimen-visual">
+                    <div class="specimen-canvas-container">
+                        <canvas class="specimen-canvas ${specimen.type === 'lsystem3d-three' ? 'interactive-3d' : ''}" 
+                                id="canvas-${index}" 
+                                width="500" height="500"
+                                data-index="${index}"></canvas>
+                        <div class="iteration-display" id="iter-${index}"></div>
+                    </div>
+                </div>
+                <div class="specimen-info">
+                    <p class="specimen-number">Plate ${toRoman(index + 1)}</p>
+                    <h2 class="specimen-name">${specimen.name}</h2>
+                    <p class="specimen-common">${specimen.common}</p>
+                    <p class="specimen-description">${specimen.description}</p>
+                    <div class="specimen-rules">
+                        <div class="rule-item">
+                            <span class="rule-label">Axiom</span>
+                            <span class="rule-value">${specimen.rules.axiom}</span>
+                        </div>
+                        <div class="rule-item">
+                            <span class="rule-label">Production</span>
+                            <span class="rule-value">${specimen.rules.rule}</span>
+                        </div>
+                        <div class="rule-item">
+                            <span class="rule-label">Angle</span>
+                            <span class="rule-value">${specimen.rules.angle}</span>
+                        </div>
+                    </div>
+                    ${paramControlsHTML}
+                </div>
+            `;
+            
+            container.appendChild(page);
+
+            // Nav dot
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot';
+            dot.onclick = () => page.scrollIntoView({ behavior: 'smooth' });
+            nav.appendChild(dot);
+
+            // Create instance
+            let instance;
+            if (specimen.type === 'phyllotaxis') {
+                instance = new PhyllotaxisSystem(specimen.config);
+            } else if (specimen.type === 'parametric') {
+                instance = new ParametricLSystem(specimen.config);
+            } else if (specimen.type === 'lsystem3d-three') {
+                instance = new LSystem3DThree(specimen.config);
+            } else if (specimen.type === 'lsystem3d') {
+                instance = new LSystem3D(specimen.config);
+            } else {
+                instance = new LSystem(specimen.config);
+            }
+            
+            specimenInstances.push({
+                instance,
+                specimen,
+                currentIteration: 0,
+                maxIteration: specimen.config.iterations || specimen.config.count,
+                drawn: false
+            });
+        });
+
+        // Parametric controls
+        document.querySelectorAll('.param-slider input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                const param = e.target.dataset.param;
+                const value = parseFloat(e.target.value);
+                const isAngle = e.target.dataset.isAngle === 'true';
+                
+                e.target.nextElementSibling.textContent = value;
+                
+                const specData = specimenInstances[index];
+                if (isAngle) {
+                    specData.instance.angle = value;
+                } else {
+                    specData.instance.params[param] = value;
+                }
+                
+                // Redraw
+                const canvas = document.getElementById(`canvas-${index}`);
+                specData.instance.draw(canvas);
+            });
+        });
+
+        // ═══════════════════════════════════════════════════════════════
+        // SCROLL-TRIGGERED ANIMATION
+        // ═══════════════════════════════════════════════════════════════
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '-10% 0px -10% 0px',
+            threshold: Array.from({ length: 20 }, (_, i) => i / 19)
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const index = parseInt(entry.target.id.split('-')[1]);
+                const specData = specimenInstances[index];
+                const canvas = document.getElementById(`canvas-${index}`);
+                const iterDisplay = document.getElementById(`iter-${index}`);
+                const navDots = document.querySelectorAll('.nav-dot');
+                
+                if (entry.isIntersecting) {
+                    navDots[index]?.classList.add('active');
+                    
+                    // Calculate iteration based on scroll position
+                    const ratio = entry.intersectionRatio;
+                    let targetIter;
+                    
+                    if (specData.specimen.type === 'phyllotaxis') {
+                        targetIter = Math.floor(ratio * specData.maxIteration);
+                        specData.instance.draw(canvas, ratio);
+                        iterDisplay.textContent = `${targetIter} of ${specData.maxIteration} elements`;
+                    } else if (specData.specimen.type === 'lsystem3d-three') {
+                        // Three.js specimens render once at full iterations
+                        if (!specData.drawn) {
+                            specData.instance.draw(canvas, specData.maxIteration);
+                            specData.drawn = true;
+                        }
+                        iterDisplay.textContent = `Interactive 3D · Drag to rotate`;
+                    } else {
+                        targetIter = Math.max(1, Math.floor(ratio * (specData.maxIteration + 1)));
+                        if (targetIter !== specData.currentIteration) {
+                            specData.currentIteration = targetIter;
+                            specData.instance.draw(canvas, targetIter);
+                            iterDisplay.textContent = `Generation ${targetIter}`;
+                        }
+                    }
+                } else {
+                    navDots[index]?.classList.remove('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.specimen-page').forEach(page => {
+            observer.observe(page);
+        });
+
+        // ═══════════════════════════════════════════════════════════════
+        // ZOOM MODAL
+        // ═══════════════════════════════════════════════════════════════
+
+        let currentZoomIndex = null;
+
+        document.querySelectorAll('.specimen-canvas').forEach(canvas => {
+            canvas.addEventListener('click', () => {
+                const index = parseInt(canvas.dataset.index);
+                openZoom(index);
+            });
+        });
+
+        function openZoom(index) {
+            currentZoomIndex = index;
+            const modal = document.getElementById('zoomModal');
+            const zoomCanvas = document.getElementById('zoomCanvas');
+            const specData = specimenInstances[index];
+            
+            if (specData.specimen.type === 'lsystem3d-three') {
+                // For Three.js specimens, show a message that they're already interactive
+                // Or create a larger Three.js view
+                const hiResInstance = new LSystem3DThree({
+                    ...specData.specimen.config,
+                    autoRotate: true,
+                    rotationSpeed: 0.003
+                });
+                hiResInstance.draw(zoomCanvas, specData.specimen.config.iterations);
+            } else if (specData.specimen.type === 'phyllotaxis') {
+                // Create high-res version
+                const hiRes = new PhyllotaxisSystem({
+                    ...specData.specimen.config,
+                    count: specData.specimen.config.count * 1.5,
+                    sizeBase: specData.specimen.config.sizeBase * 1.2
+                });
+                hiRes.draw(zoomCanvas, 1);
+            } else if (specData.specimen.type === 'parametric') {
+                specData.instance.draw(zoomCanvas);
+            } else {
+                specData.instance.draw(zoomCanvas);
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeZoom() {
+            document.getElementById('zoomModal').classList.remove('active');
+            currentZoomIndex = null;
+        }
+
+        document.getElementById('zoomModal').addEventListener('click', (e) => {
+            if (e.target.id === 'zoomModal') closeZoom();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeZoom();
+        });
+
+        // ═══════════════════════════════════════════════════════════════
+        // UTILITIES
+        // ═══════════════════════════════════════════════════════════════
+
+        function toRoman(num) {
+            const roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
+            return roman[num - 1] || num;
+        }
+
+        // Initial draw for visible specimens
+        window.addEventListener('load', () => {
+            // Wait a bit for Three.js to load
+            setTimeout(() => {
+                specimenInstances.forEach((specData, index) => {
+                    const canvas = document.getElementById(`canvas-${index}`);
+                    if (specData.specimen.type === 'phyllotaxis') {
+                        specData.instance.draw(canvas, 0.1);
+                    } else if (specData.specimen.type === 'lsystem3d-three') {
+                        // Three.js will initialize and draw when scrolled into view
+                        // or draw immediately if visible
+                        const rect = canvas.getBoundingClientRect();
+                        if (rect.top < window.innerHeight && rect.bottom > 0) {
+                            specData.instance.draw(canvas, specData.maxIteration);
+                            specData.drawn = true;
+                        }
+                    } else {
+                        specData.instance.draw(canvas, 1);
+                    }
+                });
+            }, 200);
+        });
+    </script>
+</body>
+</html>
