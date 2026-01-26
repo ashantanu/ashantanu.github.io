@@ -2,19 +2,52 @@
   {%- assign _author = include.author -%}
   <div class="m-4">
     <center>
-    <img class="image image--xl" src="assets/images/my_images/me.jpg" />
-    <br><h1>Shantanu Agarwal</h1>
+
+    <!-- Avatar Container - switches between photo and 3D -->
+    <div class="avatar-container">
+      <img class="image image--xl avatar-photo" src="assets/images/my_images/me.jpg" alt="Shantanu Agarwal" />
+      <div class="avatar-3d">
+        <iframe
+          title="Dancing Avatar"
+          frameborder="0"
+          allowfullscreen
+          mozallowfullscreen="true"
+          webkitallowfullscreen="true"
+          allow="autoplay; fullscreen; xr-spatial-tracking"
+          src="https://sketchfab.com/models/089a2d344fe34f27a73bdd65168fb22d/embed?autostart=1&transparent=1&ui_animations=0&ui_infos=0&ui_stop=0&ui_inspector=0&ui_watermark_link=0&ui_watermark=0&ui_ar=0&ui_help=0&ui_settings=0&ui_vr=0&ui_fullscreen=0&ui_annotations=0&ui_hint=0">
+        </iframe>
+      </div>
+    </div>
+
+    <!-- Mode Selector Dock -->
+    <div class="avatar-dock">
+      <div class="dock-item active" data-mode="photo" title="Photo">
+        <span class="dock-label">Photo</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M20 21a8 8 0 1 0-16 0"/>
+        </svg>
+      </div>
+      <div class="dock-item" data-mode="3d" title="3D Avatar">
+        <span class="dock-label">3D</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v4m0 14v-4M3 12h4m14 0h-4"/>
+          <path d="M5.6 5.6l2.8 2.8m7.2 7.2l2.8 2.8M5.6 18.4l2.8-2.8m7.2-7.2l2.8-2.8"/>
+          <circle cx="12" cy="12" r="4"/>
+        </svg>
+      </div>
+    </div>
+
+    <h1 style="margin-top: 0.5rem; margin-bottom: 0.25rem;">Shantanu Agarwal</h1>
     ML Engineer @ Meta
     <p style="color: #888; margin: 0.5rem 0;">📍 San Francisco</p>
-    
-    <!-- Short Bio -->
+
     <p style="font-size: 0.9rem; color: #666; line-height: 1.5; margin: 0.75rem 0;">
       Focused on building customer-focused AI products, on a 1x→100x journey.
     </p>
-    
+
     <p><b>ML &bull; DL &bull; AI &bull; CV &bull; NLP</b></p>
-    
-    <!-- Social Links -->
+
     <div class="sidebar-social" style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem;">
       <a href="https://github.com/ashantanu" target="_blank" title="GitHub" style="color: #555; transition: color 0.2s;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
@@ -31,29 +64,20 @@
     </div>
     </center>
   </div>
-<!--
-  <div class="sidebar-toc">
-    {%- assign _sidebar_nav = site.data.navigation[page.sidebar.nav] -%}
-    {%- if _sidebar_nav -%}
-    <ul class="toc toc--navigator">
-      {%- for _item in _sidebar_nav -%}
-        <li class="toc-h1">{{ _item.title }}</li>
-        {%- if _item.children -%}
-          {%- for _child in _item.children -%}
-            {%- include snippets/get-nav-url.html path=_child.url -%}
-            {%- assign _nav_url = __return -%}
-            {%- include snippets/get-nav-url.html path=page.url -%}
-            {%- assign _page_url = __return -%}
-            {%- if _nav_url == _page_url -%}
-              <li class="toc-h2 active"><a href="{{ _nav_url }}">{{ _child.title }}</a></li>
-            {%- else -%}
-              <li class="toc-h2"><a href="{{ _nav_url }}">{{ _child.title }}</a></li>
-            {%- endif -%}
-          {%- endfor -%}
-        {%- endif -%}
-      {%- endfor -%}
-      </ul>
-    {%- endif -%}
-  </div>
+
+  <!-- Simple toggle script -->
+  <script>
+    (function() {
+      const container = document.querySelector('.avatar-container');
+      const dockItems = document.querySelectorAll('.dock-item');
+
+      dockItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const mode = item.dataset.mode;
+          dockItems.forEach(i => i.classList.toggle('active', i.dataset.mode === mode));
+          container.classList.toggle('show-3d', mode === '3d');
+        });
+      });
+    })();
+  </script>
 {%- endif -%}
--->
