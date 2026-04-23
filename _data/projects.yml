@@ -1,6 +1,11 @@
 # Projects data file - Add new projects at the top
 # Both the main page (shows top 3) and projects page (shows all) use this file
 
+- name: SF Restaurant Week
+  image: assets/images/my_images/sf-restaurant-week.png
+  url: https://sf-restaurant-week.replit.app/
+  description: "A map-based web app for exploring SF Restaurant Week participating restaurants. Filter by cuisine, price, and neighborhood with real-time search on an interactive map. Got 495 unique views over a single weekend."
+
 - name: Algorithmic Flora
   image: assets/images/my_images/algorithmic-flora.png
   url: demos/algorithmic-flora.html
