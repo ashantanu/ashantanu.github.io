@@ -1,6 +1,11 @@
 # Projects data file - Add new projects at the top
 # Both the main page (shows top 3) and projects page (shows all) use this file
 
+- name: ProteinMaxxing
+  image: assets/images/my_images/proteinmaxxing.png
+  url: https://proteinmaxxing.app
+  description: "A location-based map for finding high-protein meals at nearby restaurants. Crowdsourced menu items with protein counts, source-tier badges, and dispute flags — no account needed."
+
 - name: SF Restaurant Week
   image: assets/images/my_images/sf-restaurant-week.png
   url: https://sf-map-restaurants.vercel.app
